@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sucrose.Net.Utils
+namespace Sucrose.Net.Utils.Collections
 {
     public class SortedBucket<TComparableKey, TItem> : SortedList<TComparableKey, TItem>
         where TComparableKey : IComparable
@@ -58,6 +58,8 @@ namespace Sucrose.Net.Utils
 
             Next.RemoveAt(firstSibblingIndex);
             Add(firstSibblingKey, firstSibblingItem);
+	        
+	        // todo: fix previous
         }
 
         private bool IsFit(TComparableKey key)

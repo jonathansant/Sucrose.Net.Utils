@@ -1,4 +1,5 @@
 ﻿using System;
+using Sucrose.Net.Utils.Collections;
 
 namespace Sucrose.Net.Utils
 {

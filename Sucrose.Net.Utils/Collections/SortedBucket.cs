@@ -4,97 +4,97 @@ using System.Linq;
 
 namespace Sucrose.Net.Utils.Collections
 {
-    public class SortedBucket<TComparableKey, TItem> : SortedList<TComparableKey, TItem>
-        where TComparableKey : IComparable
-    {
-        private readonly int _sizeLimit;
-        private readonly SortMode _sortMode;
+	public class SortedBucket<TComparableKey, TItem> : SortedList<TComparableKey, TItem>
+		where TComparableKey : IComparable
+	{
+		private readonly int _sizeLimit;
+		private readonly SortMode _sortMode;
 
-        public SortedBucket<TComparableKey, TItem> Next { get; private set; }
-        
-	    public SortedBucket<TComparableKey, TItem> Previous { get; private set; }
+		public SortedBucket<TComparableKey, TItem> Next { get; private set; }
 
-        public SortedBucket(int sizeLimit, SortMode mode)
-            : base(new KeyComparer<TComparableKey>(mode))
-        {
-            _sortMode = mode;
-            _sizeLimit = sizeLimit;
-        }
+		public SortedBucket<TComparableKey, TItem> Previous { get; private set; }
 
-        public new void Add(TComparableKey key, TItem value)
-        {
-            // todo: remeber to apply the IsFit Optimization
-            base.Add(key, value);
+		public SortedBucket(int sizeLimit, SortMode mode)
+			: base(new KeyComparer<TComparableKey>(mode))
+		{
+			_sortMode = mode;
+			_sizeLimit = sizeLimit;
+		}
 
-            if (Count <= _sizeLimit) 
-                return;
+		public new void Add(TComparableKey key, TItem value)
+		{
+			// todo: remeber to apply the IsFit Optimization
+			base.Add(key, value);
 
-            if (Next == null)
-                Next = new SortedBucket<TComparableKey, TItem>(_sizeLimit, _sortMode);
+			if (Count <= _sizeLimit)
+				return;
 
-            var lastIndex = Count - 1;
-            var lastItem = this.Last().Value;
-            var lastKey = Keys.Last();
+			if (Next == null)
+				Next = new SortedBucket<TComparableKey, TItem>(_sizeLimit, _sortMode);
 
-            RemoveAt(lastIndex);
-            Next.Add(lastKey, lastItem);
-	        Next.Previous = this;
-        }
+			var lastIndex = Count - 1;
+			var lastItem = this.Last().Value;
+			var lastKey = Keys.Last();
 
-        public new void Remove(TComparableKey key)
-        {
-            if (Next == null || (Next == null && Count <= _sizeLimit))
-            {
-                base.Remove(key);
-                return;
-            }
-			
-	        // todo: simply remove at the begining
-            base.Remove(key);
+			RemoveAt(lastIndex);
+			Next.Add(lastKey, lastItem);
+			Next.Previous = this;
+		}
 
-            const int firstSibblingIndex = 0;
-            var firstSibblingItem = Next.First().Value;
-            var firstSibblingKey = Next.Keys.First();
+		public new void Remove(TComparableKey key)
+		{
+			if (Next == null || ( Next == null && Count <= _sizeLimit ))
+			{
+				base.Remove(key);
+				return;
+			}
 
-            Next.RemoveAt(firstSibblingIndex);
-            Add(firstSibblingKey, firstSibblingItem);
-	        
-	        // todo: fix previous
-        }
+			// todo: simply remove at the begining
+			base.Remove(key);
 
-        private bool IsFit(TComparableKey key)
-        {
-            var firstKey = Keys.First();
-            var lastKey = Keys.Last();
+			const int firstSibblingIndex = 0;
+			var firstSibblingItem = Next.First().Value;
+			var firstSibblingKey = Next.Keys.First();
 
-            if (_sortMode == SortMode.Asc)
-            {
-                return Comparer.Compare(firstKey, key) <= 0 && Comparer.Compare(lastKey, key) >= 0;
-            }
+			Next.RemoveAt(firstSibblingIndex);
+			Add(firstSibblingKey, firstSibblingItem);
 
-            return Comparer.Compare(firstKey, key) >= 0 && Comparer.Compare(lastKey, key) <= 0;
-        }
-    }
+			// todo: fix previous
+		}
 
-    public class KeyComparer<TKey> : IComparer<TKey> where TKey : IComparable
-    {
-        private readonly SortMode _sortMode;
+		private bool IsFit(TComparableKey key)
+		{
+			var firstKey = Keys.First();
+			var lastKey = Keys.Last();
 
-        public KeyComparer(SortMode mode)
-        {
-            _sortMode = mode;
-        }
+			if (_sortMode == SortMode.Asc)
+			{
+				return Comparer.Compare(firstKey, key) <= 0 && Comparer.Compare(lastKey, key) >= 0;
+			}
 
-        public int Compare(TKey x, TKey y)
-        {
-            var result = _sortMode == SortMode.Asc ? x.CompareTo(y) : y.CompareTo(x);
-            return result == 0 ? 1 : result;
-        }
-    }
+			return Comparer.Compare(firstKey, key) >= 0 && Comparer.Compare(lastKey, key) <= 0;
+		}
+	}
 
-    public enum SortMode
-    {
-        Desc = 0,
-        Asc
-    }
+	public class KeyComparer<TKey> : IComparer<TKey> where TKey : IComparable
+	{
+		private readonly SortMode _sortMode;
+
+		public KeyComparer(SortMode mode)
+		{
+			_sortMode = mode;
+		}
+
+		public int Compare(TKey x, TKey y)
+		{
+			var result = _sortMode == SortMode.Asc ? x.CompareTo(y) : y.CompareTo(x);
+			return result == 0 ? 1 : result;
+		}
+	}
+
+	public enum SortMode
+	{
+		Desc = 0,
+		Asc
+	}
 }
